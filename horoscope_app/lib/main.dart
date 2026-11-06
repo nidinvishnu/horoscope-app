@@ -32,8 +32,18 @@ class HoroscopeApp extends StatelessWidget {
 }
 
 const List<String> signs = [
-  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
 ];
 
 const Map<String, String> readings = {
@@ -96,6 +106,33 @@ class HoroscopeScreen extends StatelessWidget {
         title: Text(sign),
         actions: [
           IconButton(
+            icon: const Icon(Icons.alarm),
+            tooltip: 'Set daily reminder',
+            onPressed: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: const TimeOfDay(hour: 8, minute: 0),
+              );
+              if (picked == null) return;
+              await NotificationService.requestPermission();
+              await NotificationService.scheduleDaily(
+                hour: picked.hour,
+                minute: picked.minute,
+              );
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setInt('reminder_hour', picked.hour);
+              await prefs.setInt('reminder_minute', picked.minute);
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Daily reminder set for ${picked.format(context)}',
+                  ),
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.notifications_outlined),
             tooltip: 'Test notification',
             onPressed: () async {
@@ -120,10 +157,7 @@ class HoroscopeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              date,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            Text(date, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 12),
             Text(
               readings[sign] ?? 'No reading available yet.',
