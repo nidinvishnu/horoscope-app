@@ -25,6 +25,21 @@ const List<String> signs = [
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
 
+const Map<String, String> readings = {
+  'Aries': 'Energy is high today. Start the thing you have been putting off.',
+  'Taurus': 'Slow down and enjoy the small comforts. Patience pays off.',
+  'Gemini': 'A conversation could spark a useful idea. Stay curious.',
+  'Cancer': 'Trust your instincts with a decision that has been nagging you.',
+  'Leo': 'Your confidence shines. Share credit and it will grow.',
+  'Virgo': 'Tidy one small corner of your life and notice how it feels.',
+  'Libra': 'Balance matters today. Say no to one thing so you can say yes to another.',
+  'Scorpio': 'Focus beats scattered effort. Pick one goal and push on it.',
+  'Sagittarius': 'Try something new, even something small.',
+  'Capricorn': 'Steady progress counts. Do not compare your pace to others.',
+  'Aquarius': 'An unusual idea deserves a second look.',
+  'Pisces': 'Rest is productive too. Give your mind some quiet time.',
+};
+
 class SignListScreen extends StatelessWidget {
   const SignListScreen({super.key});
 
@@ -59,13 +74,26 @@ class HoroscopeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final date = '${now.day}/${now.month}/${now.year}';
+
     return Scaffold(
       appBar: AppBar(title: Text(sign)),
-      body: const Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'Your horoscope for today will appear here.',
-          style: TextStyle(fontSize: 18),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              date,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              readings[sign] ?? 'No reading available yet.',
+              style: const TextStyle(fontSize: 20),
+            ),
+          ],
         ),
       ),
     );
