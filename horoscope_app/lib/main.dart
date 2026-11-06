@@ -91,10 +91,59 @@ class SignListScreen extends StatelessWidget {
   }
 }
 
-class HoroscopeScreen extends StatelessWidget {
+class HoroscopeScreen extends StatefulWidget {
   const HoroscopeScreen({super.key, required this.sign});
 
   final String sign;
+
+  @override
+  State<HoroscopeScreen> createState() => _HoroscopeScreenState();
+}
+
+class _HoroscopeScreenState extends State<HoroscopeScreen> {
+  TimeOfDay? _reminder;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReminder();
+  }
+
+  Future<void> _loadReminder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hour = prefs.getInt('reminder_hour');
+    final minute = prefs.getInt('reminder_minute');
+    if (hour != null && minute != null && mounted) {
+      setState(() => _reminder = TimeOfDay(hour: hour, minute: minute));
+    }
+  }
+
+  Future<void> _setReminder() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _reminder ?? const TimeOfDay(hour: 8, minute: 0),
+    );
+    if (picked == null) return;
+    await NotificationService.requestPermission();
+    await NotificationService.scheduleDaily(
+      hour: picked.hour,
+      minute: picked.minute,
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('reminder_hour', picked.hour);
+    await prefs.setInt('reminder_minute', picked.minute);
+    if (!mounted) return;
+    setState(() => _reminder = picked);
+  }
+
+  Future<void> _turnOffReminder() async {
+    await NotificationService.cancelDaily();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('reminder_hour');
+    await prefs.remove('reminder_minute');
+    if (!mounted) return;
+    setState(() => _reminder = null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,43 +152,8 @@ class HoroscopeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(sign),
+        title: Text(widget.sign),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.alarm),
-            tooltip: 'Set daily reminder',
-            onPressed: () async {
-              final picked = await showTimePicker(
-                context: context,
-                initialTime: const TimeOfDay(hour: 8, minute: 0),
-              );
-              if (picked == null) return;
-              await NotificationService.requestPermission();
-              await NotificationService.scheduleDaily(
-                hour: picked.hour,
-                minute: picked.minute,
-              );
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setInt('reminder_hour', picked.hour);
-              await prefs.setInt('reminder_minute', picked.minute);
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Daily reminder set for ${picked.format(context)}',
-                  ),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            tooltip: 'Test notification',
-            onPressed: () async {
-              await NotificationService.requestPermission();
-              await NotificationService.showTest();
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.swap_horiz),
             tooltip: 'Change sign',
@@ -160,8 +174,50 @@ class HoroscopeScreen extends StatelessWidget {
             Text(date, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 12),
             Text(
-              readings[sign] ?? 'No reading available yet.',
+              readings[widget.sign] ?? 'No reading available yet.',
               style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.alarm),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _reminder == null
+                                ? 'Daily reminder is off'
+                                : 'Daily reminder at ${_reminder!.format(context)}',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        FilledButton.tonal(
+                          onPressed: _setReminder,
+                          child: Text(
+                            _reminder == null ? 'Set reminder' : 'Change time',
+                          ),
+                        ),
+                        if (_reminder != null) ...[
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: _turnOffReminder,
+                            child: const Text('Turn off'),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
