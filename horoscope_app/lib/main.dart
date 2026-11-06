@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'notification_service.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.init();
   final prefs = await SharedPreferences.getInstance();
   final savedSign = prefs.getString('sign');
   runApp(HoroscopeApp(savedSign: savedSign));
@@ -90,20 +93,28 @@ class HoroscopeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-     title: Text(sign),
-     actions: [
-       IconButton(
-         icon: const Icon(Icons.swap_horiz),
-         tooltip: 'Change sign',
-         onPressed: () {
-           Navigator.pushReplacement(
-             context,
-             MaterialPageRoute(builder: (_) => const SignListScreen()),
-           );
-         },
-       ),
-     ],
-   ),
+        title: Text(sign),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            tooltip: 'Test notification',
+            onPressed: () async {
+              await NotificationService.requestPermission();
+              await NotificationService.showTest();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.swap_horiz),
+            tooltip: 'Change sign',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const SignListScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
