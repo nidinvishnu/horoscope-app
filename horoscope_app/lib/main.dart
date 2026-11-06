@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const HoroscopeApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final savedSign = prefs.getString('sign');
+  runApp(HoroscopeApp(savedSign: savedSign));
 }
 
 class HoroscopeApp extends StatelessWidget {
-  const HoroscopeApp({super.key});
+  const HoroscopeApp({super.key, this.savedSign});
+
+  final String? savedSign;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +21,9 @@ class HoroscopeApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SignListScreen(),
+      home: savedSign == null
+          ? const SignListScreen()
+          : HoroscopeScreen(sign: savedSign!),
     );
   }
 }
@@ -54,8 +62,11 @@ class SignListScreen extends StatelessWidget {
           return ListTile(
             title: Text(sign),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('sign', sign);
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => HoroscopeScreen(sign: sign)),
               );
@@ -78,7 +89,21 @@ class HoroscopeScreen extends StatelessWidget {
     final date = '${now.day}/${now.month}/${now.year}';
 
     return Scaffold(
-      appBar: AppBar(title: Text(sign)),
+      appBar: AppBar(
+     title: Text(sign),
+     actions: [
+       IconButton(
+         icon: const Icon(Icons.swap_horiz),
+         tooltip: 'Change sign',
+         onPressed: () {
+           Navigator.pushReplacement(
+             context,
+             MaterialPageRoute(builder: (_) => const SignListScreen()),
+           );
+         },
+       ),
+     ],
+   ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
