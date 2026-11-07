@@ -1,30 +1,26 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:horoscope_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('same sign and day always give the same reading', () {
+    final day = DateTime(2026, 11, 7);
+    expect(readingFor('Leo', day), readingFor('Leo', day));
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  test('reading changes from one day to the next', () {
+    final today = DateTime(2026, 11, 7);
+    final tomorrow = DateTime(2026, 11, 8);
+    expect(readingFor('Leo', today), isNot(readingFor('Leo', tomorrow)));
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  test('different signs get different readings on the same day', () {
+    final day = DateTime(2026, 11, 7);
+    expect(readingFor('Aries', day), isNot(readingFor('Taurus', day)));
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('every sign has a symbol', () {
+    for (final sign in signs) {
+      expect(symbols.containsKey(sign), isTrue);
+    }
   });
 }
