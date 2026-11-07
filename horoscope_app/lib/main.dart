@@ -46,6 +46,21 @@ const List<String> signs = [
   'Pisces',
 ];
 
+const Map<String, String> symbols = {
+  'Aries': '♈',
+  'Taurus': '♉',
+  'Gemini': '♊',
+  'Cancer': '♋',
+  'Leo': '♌',
+  'Virgo': '♍',
+  'Libra': '♎',
+  'Scorpio': '♏',
+  'Sagittarius': '♐',
+  'Capricorn': '♑',
+  'Aquarius': '♒',
+  'Pisces': '♓',
+};
+
 const Map<String, String> readings = {
   'Aries': 'Energy is high today. Start the thing you have been putting off.',
   'Taurus': 'Slow down and enjoy the small comforts. Patience pays off.',
@@ -73,6 +88,10 @@ class SignListScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final sign = signs[index];
           return ListTile(
+            leading: Text(
+              symbols[sign] ?? '',
+              style: const TextStyle(fontSize: 28),
+            ),
             title: Text(sign),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
@@ -171,11 +190,25 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(date, style: Theme.of(context).textTheme.labelLarge),
-            const SizedBox(height: 12),
-            Text(
-              readings[widget.sign] ?? 'No reading available yet.',
-              style: const TextStyle(fontSize: 20),
+            Center(
+              child: Text(
+                symbols[widget.sign] ?? '',
+                style: const TextStyle(fontSize: 72),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(date, style: Theme.of(context).textTheme.labelLarge),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  readings[widget.sign] ?? 'No reading available yet.',
+                  style: const TextStyle(fontSize: 20, height: 1.4),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Card(
