@@ -61,20 +61,48 @@ const Map<String, String> symbols = {
   'Pisces': '♓',
 };
 
-const Map<String, String> readings = {
-  'Aries': 'Energy is high today. Start the thing you have been putting off.',
-  'Taurus': 'Slow down and enjoy the small comforts. Patience pays off.',
-  'Gemini': 'A conversation could spark a useful idea. Stay curious.',
-  'Cancer': 'Trust your instincts with a decision that has been nagging you.',
-  'Leo': 'Your confidence shines. Share credit and it will grow.',
-  'Virgo': 'Tidy one small corner of your life and notice how it feels.',
-  'Libra': 'Balance matters today. Say no to one thing so you can say yes to another.',
-  'Scorpio': 'Focus beats scattered effort. Pick one goal and push on it.',
-  'Sagittarius': 'Try something new, even something small.',
-  'Capricorn': 'Steady progress counts. Do not compare your pace to others.',
-  'Aquarius': 'An unusual idea deserves a second look.',
-  'Pisces': 'Rest is productive too. Give your mind some quiet time.',
-};
+const List<String> dailyReadings = [
+  'Energy is high today. Start the thing you have been putting off.',
+  'Slow down and enjoy the small comforts. Patience pays off.',
+  'A conversation could spark a useful idea. Stay curious.',
+  'Trust your instincts with a decision that has been nagging you.',
+  'Your confidence shines. Share credit and it will grow.',
+  'Tidy one small corner of your life and notice how it feels.',
+  'Balance matters today. Say no to one thing so you can say yes to another.',
+  'Focus beats scattered effort. Pick one goal and push on it.',
+  'Try something new, even something small.',
+  'Steady progress counts. Do not compare your pace to others.',
+  'An unusual idea deserves a second look.',
+  'Rest is productive too. Give your mind some quiet time.',
+  'Reach out to someone you have not spoken to in a while.',
+  'Small habits add up. Repeat one good thing today.',
+  'A delay may turn out to be useful. Use the extra time well.',
+  'Listen more than you speak, and you will learn something.',
+  'Say what you actually mean today. Clarity saves time.',
+  'Take a short walk. Your best thinking happens on the move.',
+  'Finish one thing completely before starting another.',
+  'Ask for help. It is easier than you expect.',
+  'Let go of one worry that is not yours to carry.',
+  'Celebrate a small win you have been overlooking.',
+  'Plan tomorrow tonight, and the morning will feel lighter.',
+  'Someone is paying more attention to your effort than you realise.',
+  'Choose the simple option. It is probably the right one.',
+  'Be kind to yourself about something you cannot change.',
+  'A fresh perspective is one question away. Ask it.',
+  'Do something just because you enjoy it.',
+  'Your timing is better than you think. Trust it.',
+  'Wrap up loose ends and make room for something new.',
+];
+
+String readingFor(String sign, DateTime date) {
+  final day = DateTime.utc(
+    date.year,
+    date.month,
+    date.day,
+  ).difference(DateTime.utc(2020)).inDays;
+  final signIndex = signs.indexOf(sign);
+  return dailyReadings[(day + signIndex * 7) % dailyReadings.length];
+}
 
 class SignListScreen extends StatelessWidget {
   const SignListScreen({super.key});
@@ -205,7 +233,7 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  readings[widget.sign] ?? 'No reading available yet.',
+                  readingFor(widget.sign, DateTime.now()),
                   style: const TextStyle(fontSize: 20, height: 1.4),
                 ),
               ),
